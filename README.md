@@ -1,7 +1,7 @@
 A Dart plugin to generate boilerplate for your local database, 
 featuring low coupling and type safety, completely inspired by the [sqlc](https://sqlc.dev/) go library.
 
-This plugin works in any OS and can be used with [sqflite](https://pub.dev/packages/sqflite) quanto [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi)
+This plugin works in any OS and can be used with [sqflite](https://pub.dev/packages/sqflite) and [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi)
 
 ## Features
 
