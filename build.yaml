@@ -1,0 +1,21 @@
+builders:
+  sqlToDartBuilder:
+    import: 'package:sqlitec/sqlitec.dart'
+    builder_factories: ['sqlToDartBuilder']
+    build_extensions:
+      .sql:
+        - .sqlitec.json
+    build_to: cache
+    auto_apply: dependents
+    runs_before: ["sqlitec|sqlToDartGenerator"]
+  sqlToDartGenerator:
+    import: 'package:sqlitec/sqlitec.dart'
+    builder_factories: [ 'sqlToDartGenerator' ]
+    build_extensions: {
+      '$lib$': [
+        'sqlitec/queries.sqlitec.dart',
+        'sqlitec/schemas.sqlitec.dart'
+      ]
+    }
+    build_to: source
+    auto_apply: dependents
