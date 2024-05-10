@@ -110,8 +110,8 @@ Future<int> insertCustomer({
 ```dart
 final queries = Queries(db: /*your db instance*/);
 
-await queries.insertCustomer(name: 'Kauli', status: 'registered');
-final user = await queries.getCustomerByNameAndStatus('Kauli', status: 'registered');
+await queries.insertCustomer(name: 'Bob', status: 'registered');
+final user = await queries.getCustomerByNameAndStatus('Bob', status: 'registered');
 
-print(user); // Customers(id: 1, name: Kauli, status: registered,)
+print(user); // Customers(id: 1, name: Bob, status: registered,)
 ```
