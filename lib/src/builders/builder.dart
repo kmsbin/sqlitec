@@ -40,11 +40,11 @@ class SqliteGenerator extends Builder {
       }
     } on ParserSqlCmdException catch (e) {
       for (final error in e.errors) {
-        print(error.message);
+        log.shout(error.message);
       }
     } on AnalysisSqlCmdException catch (e) {
       for (final error in e.errors) {
-        print(error.message);
+        log.shout(error.message);
       }
     }
   }
