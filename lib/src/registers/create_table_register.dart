@@ -1,7 +1,7 @@
 import 'package:sqlitec/src/code_builders/from_json_builder.dart';
 import 'package:sqlitec/src/code_builders/to_json_builder.dart';
 import 'package:sqlitec/src/code_builders/to_string_builder.dart';
-import 'package:sqlitec/src/dql_analizer/table_analizer.dart';
+import 'package:sqlitec/src/dql_analyzer/table_analyzer.dart';
 import 'package:sqlitec/src/type_converters/dart_type_generator/dart_type_generator.dart';
 import 'package:sqlparser/sqlparser.dart';
 import 'package:change_case/change_case.dart';
@@ -14,15 +14,16 @@ import '../type_converters/string_to_dart_type.dart';
 
 class CreateTableRegister implements Register<CreateTableStatement> {
   final SqlEngine engine;
-  final CmdAnalizer analizer;
-  
-  CreateTableRegister(this.engine, this.analizer);
+  final CmdAnalyzer analyzer;
 
+  CreateTableRegister(this.engine, this.analyzer);
+
+  @override
   String register(stmt) {
     _registerTableStatement(stmt);
-    _registerTableAnalisis(stmt);
+    _registerTableAnalysis(stmt);
 
-    return convertTableToDartClass(stmt);
+    return _convertTableToDartClass(stmt);
   }
 
   void _registerTableStatement(CreateTableStatement stmt) {
@@ -39,59 +40,54 @@ class CreateTableRegister implements Register<CreateTableStatement> {
     engine.registerTable(table);
   }
 
-  String convertTableToDartClass(CreateTableStatement stmt) {
-    final columnsAndConverters = stmt.columns
-      .map(SqlColumnGeneratorDto.fromColumn)
-      .toList();
-    final clazz = ClassBuilder(
-      name: stmt.createdName.toPascalCase(),
-      methods: [
-        FromJsonBuilder(columnsAndConverters),
-        ToJsonBuilder(columnsAndConverters),
-        ToStringBuilder(columnsAndConverters),
-      ],
-      fields: [
+  String _convertTableToDartClass(CreateTableStatement stmt) {
+    final columnsAndConverters =
+        stmt.columns.map(SqlColumnGeneratorDto.fromColumn).toList();
+    final clazzName = stmt.createdName.toPascalCase();
+    final clazz = ClassBuilder(name: clazzName, methods: [
+      FromJsonBuilder(columnsAndConverters),
+      ToJsonBuilder(columnsAndConverters),
+      ToStringBuilder(columnsAndConverters, clazzName),
+    ], fields: [
+      ClassFieldBuilder(
+        name: '\$tableName',
+        dartType: 'String',
+        defaultValue: "'${stmt.createdName}'",
+        isStatic: true,
+        isConst: true,
+      ),
+      ClassFieldBuilder(
+        name: '\$createTableStatement',
+        dartType: 'String',
+        defaultValue: "'${stmt.toSql().replaceAll("'", r"\'")}'",
+        isConst: true,
+        isStatic: true,
+      ),
+      for (final converter in columnsAndConverters)
         ClassFieldBuilder(
-          name: '\$tableInfo',
-          dartType: 'String',
-          defaultValue: "'${stmt.createdName}'",
-          isStatic: true,
-          isConst: true,
+          name: converter.fieldName,
+          dartType: converter.generator.type,
+          isNullable: converter.generator.isNullable,
         ),
-        ClassFieldBuilder(
-          name: '\$createTableStatement',
-          dartType: 'String',
-          defaultValue: "'${stmt.toSql().replaceAll("'", r"\'")}'",
-          isConst: true,
-          isStatic: true,
-        ),
-        for (final converter in columnsAndConverters)
-          ClassFieldBuilder(
-            name: converter.fieldName,
-            dartType: converter.generator.type,
-            isNullable: converter.generator.isNullable,
-          ),
-      ]
-    );
+    ]);
 
     return clazz.build();
   }
 
-  void _registerTableAnalisis(CreateTableStatement stmt) {
-    final columnsAndConverters = stmt.columns
-        .map(SqlColumnGeneratorDto.fromColumn)
-        .toList();
-    final tableAnalisis = TableAnalizer(
+  void _registerTableAnalysis(CreateTableStatement stmt) {
+    final columnsAndConverters =
+        stmt.columns.map(SqlColumnGeneratorDto.fromColumn).toList();
+    final tableAnalisis = TableAnalyzer(
       name: stmt.createdName.toPascalCase(),
       columns: [
         for (final column in columnsAndConverters)
-          ColumnTableAnalizer(
+          ColumnTableAnalyzer(
             name: column.fieldName,
             generator: column.generator,
           ),
       ],
     );
-    analizer.addTable(tableAnalisis);
+    analyzer.addTable(tableAnalisis);
   }
 }
 
@@ -100,7 +96,10 @@ class SqlColumnGeneratorDto {
   final String fieldName;
   final DartTypeGenerator generator;
 
-  SqlColumnGeneratorDto({required this.columnName, required this.fieldName, required this.generator});
+  SqlColumnGeneratorDto(
+      {required this.columnName,
+      required this.fieldName,
+      required this.generator});
 
   factory SqlColumnGeneratorDto.fromColumn(ColumnDefinition definition) {
     return SqlColumnGeneratorDto(
@@ -109,5 +108,4 @@ class SqlColumnGeneratorDto {
       generator: columnDefinitionToGenerator(definition),
     );
   }
-
 }

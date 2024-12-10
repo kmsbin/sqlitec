@@ -20,8 +20,7 @@ abstract class ClassFactoryBuilder implements ClassChildBuilder {
       ..writeln('    return ${clazz.name}(')
       ..write(getArguments(clazz))
       ..writeln('    );')
-      ..write('  }')
-    ;
+      ..write('  }');
     return buffer.toString();
   }
 

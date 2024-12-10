@@ -1,23 +1,22 @@
-import 'package:sqlitec/src/code_builders/class_builder.dart';
-import 'package:sqlitec/src/code_builders/class_method_builder.dart';
 import 'package:sqlitec/src/registers/create_table_register.dart';
 
-class ToJsonBuilder extends ClassMethodBuilder {
-  final List<SqlColumnGeneratorDto> fields;
+import 'method_builder.dart';
 
-  ToJsonBuilder(this.fields) : super(
-    returnType: 'Map<String, dynamic>',
-    name: 'toJson',
-  );
+class ToJsonBuilder extends MethodBuilder {
+  ToJsonBuilder(List<SqlColumnGeneratorDto> fields)
+      : super(
+          returnType: 'Map<String, dynamic>',
+          name: 'toJson',
+          body: _getMethodReturn(fields),
+        );
 
-  @override
-  String getMethodReturn(ClassBuilder clazz) {
-    final buffer = StringBuffer('{\n');
+  static String _getMethodReturn(List<SqlColumnGeneratorDto> fields) {
+    final buffer = StringBuffer('return {\n');
     for (final field in fields) {
-      buffer.writeln("      '${field.columnName}': ${field.generator.toJson(field.fieldName)},");
+      buffer.writeln(
+          "  '${field.columnName}': ${field.generator.toJson(field.fieldName)},");
     }
-    buffer.writeln('    };');
+    buffer.writeln('};');
     return buffer.toString();
   }
-
 }

@@ -5,7 +5,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'sqlitec/schemas.sqlitec.dart';
 
-
 Future<void> main(List<String> arguments) async {
   sqfliteFfiInit();
   final db = await databaseFactoryFfi.openDatabase(
@@ -25,7 +24,8 @@ Future<void> main(List<String> arguments) async {
   print(id);
   await db.update('customers', {'updated_at': 'asdfasdfasdf'});
   // final user = await queries.getCustumerByNameAndStatus('Kauli', status: 'registered');
-  final asdf = await db.query('customers', where: 'name = ?', whereArgs: ['Kauli']);
+  final asdf =
+      await db.query('customers', where: 'name = ?', whereArgs: ['Kauli']);
   print(jsonEncode(asdf));
   await db.close();
 }

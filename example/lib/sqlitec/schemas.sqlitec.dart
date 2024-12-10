@@ -1,6 +1,7 @@
 class Orders {
-  static const String $tableInfo = 'orders';
-  static const String $createTableStatement = 'CREATE TABLE orders(id integer PRIMARY KEY AUTOINCREMENT, total decimal(5, 10) NOT NULL DEFAULT 0, customer_id int, customer_name varchar, customer_status varchar NOT NULL DEFAULT \'Hello there\'\'s\', date timestamp NOT NULL, dated timestamp NULL)';
+  static const String $tableName = 'orders';
+  static const String $createTableStatement =
+      'CREATE TABLE orders(id integer PRIMARY KEY AUTOINCREMENT, total decimal(5, 10) NOT NULL DEFAULT 0, customer_id int, customer_name varchar, customer_status varchar NOT NULL DEFAULT \'Hello there\'\'s\', date timestamp NOT NULL, dated timestamp NULL)';
   int id;
   double total;
   int? customerId;
@@ -42,21 +43,24 @@ class Orders {
     };
   }
 
+  @override
   String toString() {
-    return '''Orders(
-  id: $id,
-  total: $total,
-  customerId: $customerId,
-  customerName: $customerName,
-  customerStatus: $customerStatus,
-  date: $date,
-  dated: $dated,
-)''';  }
-
+    return ''' Orders(
+      id: $id,
+      total: $total,
+      customerId: $customerId,
+      customerName: $customerName,
+      customerStatus: $customerStatus,
+      date: $date,
+      dated: $dated,
+    )''';
+  }
 }
+
 class Customers {
-  static const String $tableInfo = 'customers';
-  static const String $createTableStatement = 'CREATE TABLE customers(id integer PRIMARY KEY AUTOINCREMENT, name varchar NOT NULL DEFAULT NULL, status varchar NOT NULL DEFAULT \'\', updated_at timestamp NOT NULL DEFAULT CURRENT_DATE)';
+  static const String $tableName = 'customers';
+  static const String $createTableStatement =
+      'CREATE TABLE customers(id integer PRIMARY KEY AUTOINCREMENT, name varchar NOT NULL DEFAULT NULL, status varchar NOT NULL DEFAULT \'\', updated_at timestamp NOT NULL DEFAULT CURRENT_DATE)';
   int id;
   String name;
   String status;
@@ -86,18 +90,21 @@ class Customers {
     };
   }
 
+  @override
   String toString() {
-    return '''Customers(
-  id: $id,
-  name: $name,
-  status: $status,
-  updatedAt: $updatedAt,
-)''';  }
-
+    return ''' Customers(
+      id: $id,
+      name: $name,
+      status: $status,
+      updatedAt: $updatedAt,
+    )''';
+  }
 }
+
 class Payments {
-  static const String $tableInfo = 'payments';
-  static const String $createTableStatement = 'CREATE TABLE payments(id int PRIMARY KEY, customer_id int NOT NULL, orders_id int NOT NULL, amount real NOT NULL)';
+  static const String $tableName = 'payments';
+  static const String $createTableStatement =
+      'CREATE TABLE payments(id int PRIMARY KEY, customer_id int NOT NULL, orders_id int NOT NULL, amount real NOT NULL)';
   int id;
   int customerId;
   int ordersId;
@@ -127,12 +134,13 @@ class Payments {
     };
   }
 
+  @override
   String toString() {
-    return '''Payments(
-  id: $id,
-  customerId: $customerId,
-  ordersId: $ordersId,
-  amount: $amount,
-)''';  }
-
+    return ''' Payments(
+      id: $id,
+      customerId: $customerId,
+      ordersId: $ordersId,
+      amount: $amount,
+    )''';
+  }
 }

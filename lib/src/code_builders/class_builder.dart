@@ -1,6 +1,3 @@
-
-import 'package:sqlitec/src/code_builders/class_factory_builder.dart';
-
 import 'class_field_builder.dart';
 
 abstract class ClassSyntaxBuilder {
@@ -12,18 +9,19 @@ class ClassBuilder implements ClassSyntaxBuilder {
   final List<ClassChildBuilder> fields;
   final List<ClassChildBuilder> methods;
   final List<String> rawMethods;
+  final int indentationSpaces;
 
   ClassBuilder({
     required this.name,
     this.fields = const [],
     this.methods = const [],
     this.rawMethods = const [],
+    this.indentationSpaces = 2,
   });
 
   @override
   String build() {
-    final buffer = StringBuffer()
-      ..writeln('class $name {');
+    final buffer = StringBuffer()..writeln('class $name {');
     for (final column in fields) {
       buffer.writeln('  ${column.build(this)}');
     }
@@ -43,8 +41,7 @@ class ClassBuilder implements ClassSyntaxBuilder {
   }
 
   String generateConstructor() {
-    final buffer = StringBuffer('\n')
-      ..writeln('  $name({');
+    final buffer = StringBuffer('\n')..writeln('  $name({');
     for (final child in fields.whereType<ClassFieldBuilder>()) {
       if (!child.isStatic) {
         buffer.writeln('    ${child.constructorBuild()}');
@@ -58,6 +55,3 @@ class ClassBuilder implements ClassSyntaxBuilder {
 abstract interface class ClassChildBuilder {
   String build(ClassBuilder clazz);
 }
-
-
-

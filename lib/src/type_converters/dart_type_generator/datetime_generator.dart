@@ -1,7 +1,6 @@
 import 'dart_type_generator.dart';
 
 class DateTimeGenerator implements DartTypeGenerator {
-
   const DateTimeGenerator();
 
   @override

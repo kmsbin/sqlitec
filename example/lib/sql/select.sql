@@ -1,9 +1,9 @@
--- name: GetCustomersById :many
+-- name: getCustomersById :many
 select * from customers where customers.id = ?;
 
--- name: GetCustomerById :one
+-- name: getCustomerById :one
 select * from customers where customers.id = ?;
 
--- name: GetCustomersIdWhereStatusIs :many
+-- name: getCustomersIdWhereStatusIs :many
 select id from customers where status = :status;
 

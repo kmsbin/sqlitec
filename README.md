@@ -1,19 +1,21 @@
-A Dart plugin to generate boilerplate for your local database, 
-featuring low coupling and type safety, completely inspired by the [sqlc](https://sqlc.dev/) go library.
+A Dart plugin to generate boilerplate code for your local database,  
+featuring low coupling and type safety, completely inspired by the [sqlc](https://sqlc.dev/) Go library.
 
-This plugin works in any OS and can be used with [sqflite](https://pub.dev/packages/sqflite) and [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi)
+**IT IS NOT AN ORM.** This package has no intention of being an ORM. 
+Instead, it simply writes the tedious parts of database handling for you, leaving you in 
+control and fully aware of what is happening. There is no magic code, no surprises, just simple, and idiomatic dart code.
 
+This plugin works on any operating system and can be used with [sqflite](https://pub.dev/packages/sqflite) and [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi).
 ## Features
 
 Use this plugin in your dart application to:
-
-- Generate classes from your DDL code.
-- Generate methods from your queries with type safety.
-- Consume data from your database without needing to worry about type casting and all the boilerplate.
+- Create classes from you tables.
+- Call your queries as a simple dart method ensuring type safety.
+- Consume data from your database without need to worry about type casting and all the boilerplate.
 
 ## Getting started
 
-To use this plugin you need to install sqflite or sqflite_common_ffi.
+To use this plugin you will need sqflite or sqflite_common_ffi implementation.
 
 ## Usage
 
@@ -37,7 +39,7 @@ insert into customers(name, status) values (?, ?);
  
 
 ```dart
-// in file sqlitec/schemas.dart
+// sqlitec/schemas.dart
 class Customers {
   static const String $tableInfo = 'customers';
   static const String $createTableStatement = 'CREATE TABLE customers(id integer PRIMARY KEY AUTOINCREMENT, name varchar NOT NULL DEFAULT NULL, status varchar NOT NULL DEFAULT \'\')';

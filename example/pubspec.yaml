@@ -13,3 +13,4 @@ dependencies:
   dart_style: ^2.3.6
   sqflite_common_ffi: ^2.3.3
 
+  sqflite_common: any

@@ -43,12 +43,14 @@ const _stringToDartTypeMap = {
       return _stringToDartTypeMap[keys]!;
     }
   }
-  return (ObjectTypeGenerator(), ObjectNullableTypeGenerator());
+  return (const ObjectTypeGenerator(), const ObjectNullableTypeGenerator());
 }
 
 DartTypeGenerator columnDefinitionToGenerator(ColumnDefinition definition) {
-  final (generator, nullableGenerator) = getTypeByString(definition.typeName ?? '');
-  if (definition.constraints.any((e) => e is NotNull || e is PrimaryKeyColumn)) {
+  final (generator, nullableGenerator) =
+      getTypeByString(definition.typeName ?? '');
+  if (definition.constraints
+      .any((e) => e is NotNull || e is PrimaryKeyColumn)) {
     return generator;
   }
   return nullableGenerator;

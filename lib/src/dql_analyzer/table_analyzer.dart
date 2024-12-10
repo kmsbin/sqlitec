@@ -2,38 +2,37 @@ import 'package:change_case/change_case.dart';
 import 'package:sqlitec/src/type_converters/dart_type_generator/dart_type_generator.dart';
 import 'package:collection/collection.dart';
 
-class TableAnalizer {
+class TableAnalyzer {
   final String name;
-  final List<ColumnTableAnalizer> columns;
+  final List<ColumnTableAnalyzer> columns;
 
-  TableAnalizer({
+  const TableAnalyzer({
     required this.name,
     required this.columns,
   });
 }
 
-class ColumnTableAnalizer {
+class ColumnTableAnalyzer {
   final String name;
   final DartTypeGenerator generator;
 
-  ColumnTableAnalizer({required this.name, required this.generator});
+  const ColumnTableAnalyzer({required this.name, required this.generator});
 }
 
-class CmdAnalizer {
-  final List<TableAnalizer> tables;
+class CmdAnalyzer {
+  final List<TableAnalyzer> tables;
 
-  CmdAnalizer({List<TableAnalizer>? tables}) : tables = [];
+  CmdAnalyzer({List<TableAnalyzer>? tables}) : tables = tables ?? [];
 
-  void addTable(TableAnalizer table) {
+  void addTable(TableAnalyzer table) {
     if (tables.any((e) => e.name == table.name)) {
       throw Exception('2 tables with same name');
     }
     tables.add(table);
   }
 
-  TableAnalizer? findTableByName(String name) {
+  TableAnalyzer? findTableByName(String name) {
     name = name.toPascalCase();
     return tables.firstWhereOrNull((table) => table.name == name);
   }
-
 }

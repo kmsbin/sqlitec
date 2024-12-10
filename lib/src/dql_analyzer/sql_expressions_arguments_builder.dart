@@ -1,3 +1,4 @@
+import 'package:sqlitec/src/code_builders/method_builder.dart';
 import 'package:sqlitec/src/type_converters/string_to_basic_type.dart';
 import 'package:sqlparser/sqlparser.dart';
 
@@ -10,7 +11,7 @@ final class SqlExpressionsArgumentsBuilder {
     final fields = <ExpressionField>[];
 
     for (final descendant in nodes) {
-      final field = switch(descendant) {
+      final field = switch (descendant) {
         BinaryExpression field => [_getBinaryExpression(field)],
         InExpression field => _getInExpression(field),
         BetweenExpression field => [_getBetweenExpression(field)],
@@ -26,33 +27,36 @@ final class SqlExpressionsArgumentsBuilder {
     return fields;
   }
 
-  (String, List<String>) generateFunctionArgs(Iterable<AstNode> nodes) {
+  List<FunctionArgument> generateFunctionArgs(Iterable<AstNode> nodes) {
     final fields = getFields(nodes);
-    final positionalBuffer = <String>[];
-    final namedBuffer = <String>[];
-    final args = <String>[];
+    final functionArgs = <FunctionArgument>[];
+    final dbArgs = <String>[];
     for (final (i, arg) in fields.indexed) {
+      final argName = arg.name ?? '\$arg${i + 1}';
       if (arg.name != null) {
-        namedBuffer.add('    required ${getDartTypeByBasicType(arg.type)} ${arg.name}, \n');
-        args.add(arg.name!);
+        functionArgs.add(
+          NamedArgument.required(
+            type: getDartTypeByBasicType(arg.type),
+            name: argName,
+          ),
+        );
       } else {
-        final argName = '\$arg${i+1}';
-        positionalBuffer.add('${getDartTypeByBasicType(arg.type)} $argName');
-        args.add(argName);
+        functionArgs.add(
+          PositionalArgument(
+            type: getDartTypeByBasicType(arg.type),
+            name: argName,
+          ),
+        );
       }
+      dbArgs.add(argName);
     }
-    var argReturns = positionalBuffer.join(', ');
 
-    if (namedBuffer.isNotEmpty) {
-      if (argReturns.isNotEmpty) {
-        argReturns += ', ';
-      }
-      argReturns += '{\n${namedBuffer.join()}  }';
-    }
-    return (argReturns, args);
+    return functionArgs;
   }
 
-  bool isExpressionValid(Expression exp) => (exp is NumberedVariable && exp.span?.text == '?') || exp is ColonNamedVariable;
+  bool isExpressionValid(Expression exp) =>
+      (exp is NumberedVariable && exp.span?.text == '?') ||
+      exp is ColonNamedVariable;
 
   String? getNameFromSpan(Expression argExp) {
     if (argExp is ColonNamedVariable) {

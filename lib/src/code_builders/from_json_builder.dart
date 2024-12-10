@@ -7,15 +7,14 @@ import 'class_field_builder.dart';
 class FromJsonBuilder extends ClassFactoryBuilder {
   final List<SqlColumnGeneratorDto> fields;
 
-  FromJsonBuilder(this.fields) : super(
-    name: 'fromJson',
-    args: [
-      ClassFieldBuilder(
-        name: 'jsonMap',
-        dartType: 'Map<String, dynamic>'
-      ),
-    ],
-  );
+  FromJsonBuilder(this.fields)
+      : super(
+          name: 'fromJson',
+          args: [
+            ClassFieldBuilder(
+                name: 'jsonMap', dartType: 'Map<String, dynamic>'),
+          ],
+        );
 
   String _getJsonMapArg(String field) => "jsonMap['$field']";
 
@@ -30,5 +29,4 @@ class FromJsonBuilder extends ClassFactoryBuilder {
     }
     return buffer.toString();
   }
-
 }

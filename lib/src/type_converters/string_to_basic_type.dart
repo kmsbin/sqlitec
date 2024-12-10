@@ -31,15 +31,6 @@ const _stringToBasicTypeMap = {
   ['blob']: BasicType.blob,
 };
 
-const _basicTypeToDart = {
-  BasicType.int: 'int',
-  BasicType.real: 'double',
-  BasicType.text: 'String',
-  BasicType.any: 'dynamic',
-  BasicType.nullType: 'dynamic',
-  BasicType.blob: 'List<int>'
-};
-
 BasicType getTypeByString(String type) {
   type = type.toLowerCase();
   if (type.contains('decimal')) return BasicType.real;
@@ -50,7 +41,7 @@ BasicType getTypeByString(String type) {
 }
 
 String getDartTypeByBasicType(BasicType? type) {
-  return switch(type) {
+  return switch (type) {
     BasicType.int => 'int',
     BasicType.real => 'double',
     BasicType.text => 'String',
@@ -61,11 +52,11 @@ String getDartTypeByBasicType(BasicType? type) {
 }
 
 DartTypeGenerator getDartGeneratorFromBasicType(ResolvedType? type) {
-  final generator = switch(type?.type) {
-    BasicType.int => (IntTypeGenerator(), IntNullableTypeGenerator()),
-    BasicType.real => (DoubleTypeGenerator(), DoubleNullableTypeGenerator()),
-    BasicType.text => (StringTypeGenerator(), StringNullableTypeGenerator()),
-    _ => (ObjectTypeGenerator(), ObjectNullableTypeGenerator()),
+  final generator = switch (type?.type) {
+    BasicType.int => (const IntTypeGenerator(), const IntNullableTypeGenerator()),
+    BasicType.real => (const DoubleTypeGenerator(), const DoubleNullableTypeGenerator()),
+    BasicType.text => (const StringTypeGenerator(), const StringNullableTypeGenerator()),
+    _ => (const ObjectTypeGenerator(), const ObjectNullableTypeGenerator()),
   };
   if (type?.nullable ?? false) {
     return generator.$2;
@@ -76,6 +67,7 @@ DartTypeGenerator getDartGeneratorFromBasicType(ResolvedType? type) {
 ResolvedType columnDefinitionToResolvedType(ColumnDefinition definition) {
   return ResolvedType(
     type: getTypeByString(definition.typeName ?? ''),
-    nullable: !definition.constraints.any((e) => e is NotNull || e is PrimaryKeyColumn),
+    nullable: !definition.constraints
+        .any((e) => e is NotNull || e is PrimaryKeyColumn),
   );
 }

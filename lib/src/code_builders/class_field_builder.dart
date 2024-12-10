@@ -36,7 +36,7 @@ class ClassFieldBuilder implements ClassChildBuilder {
     } else if (isConst) {
       buffer.write('const ');
     }
-    buffer.write('$dartType');
+    buffer.write(dartType);
     if (isNullable && dartType != 'dynamic' && !dartType.endsWith('?')) {
       buffer.write('?');
     }
@@ -61,5 +61,5 @@ class ClassFieldBuilder implements ClassChildBuilder {
     return buffer.toString();
   }
 
-  String constructAsArg() => '${this.dartType} $name';
+  String constructAsArg() => '$dartType $name';
 }

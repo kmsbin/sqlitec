@@ -25,4 +25,3 @@ class ObjectNullableTypeGenerator extends DartTypeGenerator {
   @override
   bool get isNullable => true;
 }
-

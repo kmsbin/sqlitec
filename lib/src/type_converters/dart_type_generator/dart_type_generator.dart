@@ -1,6 +1,3 @@
-
-
-
 abstract class DartTypeGenerator {
   abstract final String type;
 
