@@ -1,15 +1,4 @@
 class Orders {
-  static const String $tableName = 'orders';
-  static const String $createTableStatement =
-      'CREATE TABLE orders(id integer PRIMARY KEY AUTOINCREMENT, total decimal(5, 10) NOT NULL DEFAULT 0, customer_id int, customer_name varchar, customer_status varchar NOT NULL DEFAULT \'Hello there\'\'s\', date timestamp NOT NULL, dated timestamp NULL)';
-  int id;
-  double total;
-  int? customerId;
-  String? customerName;
-  String customerStatus;
-  DateTime date;
-  DateTime? dated;
-
   Orders({
     required this.id,
     required this.total,
@@ -20,17 +9,35 @@ class Orders {
     this.dated,
   });
 
-  factory Orders.fromJson(Map<String, dynamic> jsonMap) {
-    return Orders(
-      id: (jsonMap['id'] as num).toInt(),
-      total: (jsonMap['total'] as num).toDouble(),
-      customerId: (jsonMap['customer_id'] as num?)?.toInt(),
-      customerName: jsonMap['customer_name'] as String?,
-      customerStatus: jsonMap['customer_status'] as String,
-      date: DateTime.parse(jsonMap['date']),
-      dated: jsonMap['dated'] == null ? null : DateTime.parse(jsonMap['dated']),
-    );
-  }
+  factory Orders.fromJson(Map<String, dynamic> data) => Orders(
+        id: (data['id'] as num).toInt(),
+        total: (data['total'] as num).toDouble(),
+        customerId: (data['customer_id'] as num?)?.toInt(),
+        customerName: data['customer_name'] as String?,
+        customerStatus: data['customer_status'] as String,
+        date: DateTime.parse(data['date']),
+        dated: data['dated'] == null ? null : DateTime.parse(data['dated']),
+      );
+
+  static const String $tableName = 'orders';
+
+  static const String $createTableStatement =
+      'CREATE TABLE orders(id integer PRIMARY KEY AUTOINCREMENT, total decimal(5, 10) NOT NULL DEFAULT 0, customer_id int, customer_name varchar, customer_status varchar NOT NULL DEFAULT \'Hello there\'\'s\', date timestamp NOT NULL, dated timestamp NULL)';
+
+  final int id;
+
+  final double total;
+
+  final int? customerId;
+
+  final String? customerName;
+
+  final String customerStatus;
+
+  final DateTime date;
+
+  final DateTime? dated;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -42,30 +49,9 @@ class Orders {
       'dated': dated?.toIso8601String(),
     };
   }
-
-  @override
-  String toString() {
-    return ''' Orders(
-      id: $id,
-      total: $total,
-      customerId: $customerId,
-      customerName: $customerName,
-      customerStatus: $customerStatus,
-      date: $date,
-      dated: $dated,
-    )''';
-  }
 }
 
 class Customers {
-  static const String $tableName = 'customers';
-  static const String $createTableStatement =
-      'CREATE TABLE customers(id integer PRIMARY KEY AUTOINCREMENT, name varchar NOT NULL DEFAULT NULL, status varchar NOT NULL DEFAULT \'\', updated_at timestamp NOT NULL DEFAULT CURRENT_DATE)';
-  int id;
-  String name;
-  String status;
-  DateTime updatedAt;
-
   Customers({
     required this.id,
     required this.name,
@@ -73,14 +59,26 @@ class Customers {
     required this.updatedAt,
   });
 
-  factory Customers.fromJson(Map<String, dynamic> jsonMap) {
-    return Customers(
-      id: (jsonMap['id'] as num).toInt(),
-      name: jsonMap['name'] as String,
-      status: jsonMap['status'] as String,
-      updatedAt: DateTime.parse(jsonMap['updated_at']),
-    );
-  }
+  factory Customers.fromJson(Map<String, dynamic> data) => Customers(
+        id: (data['id'] as num).toInt(),
+        name: data['name'] as String,
+        status: data['status'] as String,
+        updatedAt: DateTime.parse(data['updated_at']),
+      );
+
+  static const String $tableName = 'customers';
+
+  static const String $createTableStatement =
+      'CREATE TABLE customers(id integer PRIMARY KEY AUTOINCREMENT, name varchar NOT NULL DEFAULT NULL, status varchar NOT NULL DEFAULT \'\', updated_at timestamp NOT NULL DEFAULT CURRENT_DATE)';
+
+  final int id;
+
+  final String name;
+
+  final String status;
+
+  final DateTime updatedAt;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -89,27 +87,9 @@ class Customers {
       'updated_at': updatedAt.toIso8601String(),
     };
   }
-
-  @override
-  String toString() {
-    return ''' Customers(
-      id: $id,
-      name: $name,
-      status: $status,
-      updatedAt: $updatedAt,
-    )''';
-  }
 }
 
 class Payments {
-  static const String $tableName = 'payments';
-  static const String $createTableStatement =
-      'CREATE TABLE payments(id int PRIMARY KEY, customer_id int NOT NULL, orders_id int NOT NULL, amount real NOT NULL)';
-  int id;
-  int customerId;
-  int ordersId;
-  double amount;
-
   Payments({
     required this.id,
     required this.customerId,
@@ -117,14 +97,26 @@ class Payments {
     required this.amount,
   });
 
-  factory Payments.fromJson(Map<String, dynamic> jsonMap) {
-    return Payments(
-      id: (jsonMap['id'] as num).toInt(),
-      customerId: (jsonMap['customer_id'] as num).toInt(),
-      ordersId: (jsonMap['orders_id'] as num).toInt(),
-      amount: (jsonMap['amount'] as num).toDouble(),
-    );
-  }
+  factory Payments.fromJson(Map<String, dynamic> data) => Payments(
+        id: (data['id'] as num).toInt(),
+        customerId: (data['customer_id'] as num).toInt(),
+        ordersId: (data['orders_id'] as num).toInt(),
+        amount: (data['amount'] as num).toDouble(),
+      );
+
+  static const String $tableName = 'payments';
+
+  static const String $createTableStatement =
+      'CREATE TABLE payments(id int PRIMARY KEY, customer_id int NOT NULL, orders_id int NOT NULL, amount real NOT NULL)';
+
+  final int id;
+
+  final int customerId;
+
+  final int ordersId;
+
+  final double amount;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -132,15 +124,5 @@ class Payments {
       'orders_id': ordersId,
       'amount': amount,
     };
-  }
-
-  @override
-  String toString() {
-    return ''' Payments(
-      id: $id,
-      customerId: $customerId,
-      ordersId: $ordersId,
-      amount: $amount,
-    )''';
   }
 }

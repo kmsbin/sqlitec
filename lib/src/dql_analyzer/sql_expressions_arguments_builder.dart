@@ -1,4 +1,4 @@
-import 'package:sqlitec/src/code_builders/method_builder.dart';
+import 'package:code_builder/code_builder.dart' as builder;
 import 'package:sqlitec/src/type_converters/string_to_basic_type.dart';
 import 'package:sqlparser/sqlparser.dart';
 
@@ -7,7 +7,7 @@ final class SqlExpressionsArgumentsBuilder {
 
   const SqlExpressionsArgumentsBuilder(this.context);
 
-  List<ExpressionField> getFields(Iterable<AstNode> nodes) {
+  List<ExpressionField> _getFields(Iterable<AstNode> nodes) {
     final fields = <ExpressionField>[];
 
     for (final descendant in nodes) {
@@ -17,6 +17,9 @@ final class SqlExpressionsArgumentsBuilder {
         BetweenExpression field => [_getBetweenExpression(field)],
         CaseExpression field => [_getCaseExpression(field)],
         SingleColumnSetComponent field => [_getSetComponentExpression(field)],
+        StringComparisonExpression field => [
+            _getStringComparisonExpression(field)
+          ],
         _ => null,
       };
 
@@ -27,31 +30,39 @@ final class SqlExpressionsArgumentsBuilder {
     return fields;
   }
 
-  List<FunctionArgument> generateFunctionArgs(Iterable<AstNode> nodes) {
-    final fields = getFields(nodes);
-    final functionArgs = <FunctionArgument>[];
-    final dbArgs = <String>[];
+  ArgsParameters getMethodParameters(Iterable<AstNode> nodes) {
+    final fields = _getFields(nodes);
+    final args = ArgsParameters();
+
     for (final (i, arg) in fields.indexed) {
+      final paramType = builder.refer(getDartTypeByBasicType(arg.type));
       final argName = arg.name ?? '\$arg${i + 1}';
-      if (arg.name != null) {
-        functionArgs.add(
-          NamedArgument.required(
-            type: getDartTypeByBasicType(arg.type),
-            name: argName,
-          ),
+
+      if (arg.name case final paramName?) {
+        final parameter = builder.Parameter(
+          (builder) => builder
+            ..name = paramName
+            ..named = true
+            ..type = paramType
+            ..required = true,
         );
+
+        args.named.add(parameter);
       } else {
-        functionArgs.add(
-          PositionalArgument(
-            type: getDartTypeByBasicType(arg.type),
-            name: argName,
-          ),
+        final parameter = builder.Parameter(
+          (builder) => builder
+            ..name = '\$arg${i + 1}'
+            ..named = false
+            ..required = false
+            ..type = paramType,
         );
+
+        args.positional.add(parameter);
       }
-      dbArgs.add(argName);
+      args.args.add(argName);
     }
 
-    return functionArgs;
+    return args;
   }
 
   bool isExpressionValid(Expression exp) =>
@@ -90,6 +101,25 @@ final class SqlExpressionsArgumentsBuilder {
       return ExpressionField(
         name: getNameFromSpan(exp.lower),
         type: context.typeOf(exp.upper).type?.type ?? BasicType.any,
+      );
+    }
+    return null;
+  }
+
+  ExpressionField? _getStringComparisonExpression(
+      StringComparisonExpression exp) {
+    if (isExpressionValid(exp.left)) {
+      return ExpressionField(
+        name: getNameFromSpan(exp.left),
+        type: context.typeOf(exp.right).type?.type ?? BasicType.any,
+      );
+    }
+    if (isExpressionValid(exp.right)) {
+      final right = exp.right;
+      exp.right = NumberedVariable(null);
+      return ExpressionField(
+        name: getNameFromSpan(right),
+        type: context.typeOf(exp.left).type?.type ?? BasicType.any,
       );
     }
     return null;
@@ -146,4 +176,17 @@ class ExpressionField {
   String toString() {
     return '({name: $name, type: $type, isList: $isList})';
   }
+}
+
+class ArgsParameters {
+  final List<builder.Parameter> positional;
+  final List<builder.Parameter> named;
+  final List<String> args;
+
+  ArgsParameters()
+      : args = [],
+        positional = [],
+        named = [];
+
+  String get dbArgs => args.join(', ');
 }

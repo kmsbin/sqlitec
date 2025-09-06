@@ -1,5 +1,5 @@
 import 'package:change_case/change_case.dart';
-import 'package:sqlitec/src/code_builders/method_builder.dart';
+import 'package:code_builder/code_builder.dart';
 import 'package:sqlitec/src/dql_analyzer/comment_analyzer.dart';
 import 'package:sqlitec/src/dql_analyzer/sql_expressions_arguments_builder.dart';
 import 'package:sqlitec/src/dql_analyzer/table_analyzer.dart';
@@ -10,15 +10,19 @@ import 'package:sqlparser/utils/node_to_text.dart';
 
 import 'registers.dart';
 
-class UpdateRegister implements Register<UpdateStatement> {
+class UpdateRegister implements ActionRegister<UpdateStatement> {
   final SqlEngine engine;
   final CmdAnalyzer cmdAnalyzer;
   final AnalyzedComment comment;
 
-  const UpdateRegister(this.engine, this.comment, this.cmdAnalyzer);
+  const UpdateRegister(
+    this.engine,
+    this.comment,
+    this.cmdAnalyzer,
+  );
 
   @override
-  String register(stmt) {
+  Method register(stmt) {
     final context = engine.analyze(stmt.toSql());
 
     if (context.errors.isNotEmpty) {
@@ -26,7 +30,7 @@ class UpdateRegister implements Register<UpdateStatement> {
     }
     final sqlStmt = context.root as UpdateStatement;
 
-    return generateMethodColumns(sqlStmt, context);
+    return _generateMethodColumns(sqlStmt, context);
   }
 
   ({String name, String type})? getReturnType(
@@ -50,25 +54,32 @@ class UpdateRegister implements Register<UpdateStatement> {
         '${args.map((e) => "$padding  ${e.fieldName},\n").join('')}$padding]';
   }
 
-  String generateMethodColumns(
+  Method _generateMethodColumns(
     UpdateStatement stmt,
     AnalysisContext context,
   ) {
     final args = SqlExpressionsArgumentsBuilder(context)
-        .generateFunctionArgs(stmt.selfAndDescendants);
-    final dbArgs = args.map((it) => '    ${it.name}').join(', \n');
-    return MethodBuilder(
-      name: comment.name,
-      arguments: args,
-      body: '''
+        .getMethodParameters(stmt.selfAndDescendants);
+    final dbArgs = args.args.join(',');
+    final sqlCmd = stmt.toSql().replaceAll("'", r"\'");
+
+    final code = '''
 final result = await db.rawUpdate(
-  '${stmt.toSql().replaceAll("'", r"\'")}', 
-  [\n $dbArgs}
-  ],
+  '$sqlCmd', 
+  [$dbArgs],
 );
 
-return result;''',
-    ).build();
+return result;''';
+
+    return Method(
+      (builder) => builder
+        ..name = comment.name
+        ..requiredParameters.addAll(args.positional)
+        ..modifier = MethodModifier.async
+        ..optionalParameters.addAll(args.named)
+        ..returns = refer('Future<int>')
+        ..body = Code(code),
+    );
   }
 }
 

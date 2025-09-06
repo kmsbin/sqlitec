@@ -18,7 +18,7 @@ Future<void> main(List<String> arguments) async {
     ),
   );
 
-  final queries = Queries(db: db);
+  final queries = Queries(db);
 
   var id = await queries.insertCustumer(name: 'Kauli', status: 'registered');
   print(id);

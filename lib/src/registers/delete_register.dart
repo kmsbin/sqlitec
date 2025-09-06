@@ -1,5 +1,5 @@
 import 'package:change_case/change_case.dart';
-import 'package:sqlitec/src/code_builders/method_builder.dart';
+import 'package:code_builder/code_builder.dart';
 import 'package:sqlitec/src/dql_analyzer/comment_analyzer.dart';
 import 'package:sqlitec/src/dql_analyzer/sql_expressions_arguments_builder.dart';
 import 'package:sqlitec/src/dql_analyzer/table_analyzer.dart';
@@ -10,15 +10,19 @@ import 'package:sqlparser/utils/node_to_text.dart';
 
 import 'registers.dart';
 
-class DeleteRegister implements Register<DeleteStatement> {
+class DeleteRegister implements ActionRegister<DeleteStatement> {
   final SqlEngine engine;
   final CmdAnalyzer cmdAnalyzer;
   final AnalyzedComment comment;
 
-  const DeleteRegister(this.engine, this.comment, this.cmdAnalyzer);
+  const DeleteRegister(
+    this.engine,
+    this.comment,
+    this.cmdAnalyzer,
+  );
 
   @override
-  String register(stmt) {
+  Method register(stmt) {
     final context = engine.analyze(stmt.toSql());
 
     if (context.errors.isNotEmpty) {
@@ -50,30 +54,31 @@ class DeleteRegister implements Register<DeleteStatement> {
         '${args.map((e) => "$padding  ${e.fieldName},\n").join('')}$padding]';
   }
 
-  String generateMethodColumns(
+  Method generateMethodColumns(
     DeleteStatement stmt,
     AnalysisContext context,
   ) {
     final args = SqlExpressionsArgumentsBuilder(context)
-        .generateFunctionArgs(stmt.selfAndDescendants);
+        .getMethodParameters(stmt.selfAndDescendants);
 
-    final body = '''
+    final body = '''\n
 final result = await db.rawDelete(
   '${stmt.toSql().replaceAll("'", r"\'")}',  
-  [\n${args.map((e) => '    ${e.name}').join(', \n')}
+  [\n${args.args.map((e) => '    $e').join(', \n')}
   ],
 );
 
 return result;''';
 
-    return MethodBuilder(
-      name: comment.name,
-      returnType: 'Future<int>',
-      isAsync: true,
-      arguments: args,
-      indentationSpaces: 2,
-      body: body,
-    ).build();
+    return Method(
+      (builder) => builder
+        ..name = comment.name
+        ..modifier = MethodModifier.async
+        ..body = Code(body)
+        ..returns = refer('Future<int>')
+        ..requiredParameters.addAll(args.positional)
+        ..optionalParameters.addAll(args.named),
+    );
   }
 }
 

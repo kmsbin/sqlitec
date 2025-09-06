@@ -2,11 +2,9 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'schemas.sqlitec.dart';
 
 class Queries {
-  DatabaseExecutor db;
+  const Queries(this.db);
 
-  Queries({
-    required this.db,
-  });
+  final DatabaseExecutor db;
 
   Future<Customers?> getCustumerByNameAndStatus(
     String $arg1, {
@@ -26,15 +24,13 @@ class Queries {
     required String name,
     required String status,
   }) async {
-    final result = await db.rawInsert(
+    return await db.rawInsert(
       'INSERT INTO customers (name, status) VALUES (?, ?)',
       [
         name,
         status,
       ],
     );
-
-    return result;
   }
 
   Future<List<Customers?>> getCustomersById(int $arg1) async {
@@ -57,9 +53,8 @@ class Queries {
     return Customers.fromJson(resultFirst);
   }
 
-  Future<List<int?>> getCustomersIdWhereStatusIs({
-    required String status,
-  }) async {
+  Future<List<int?>> getCustomersIdWhereStatusIs(
+      {required String status}) async {
     final result = await db.rawQuery(
       'SELECT id FROM customers WHERE status = ?',
       [status],
@@ -74,7 +69,7 @@ class Queries {
     required String status,
     required dynamic updatedAt,
   }) async {
-    final result = await db.rawInsert(
+    return await db.rawInsert(
       'INSERT INTO customers VALUES (?, ?, ?)',
       [
         id,
@@ -83,8 +78,6 @@ class Queries {
         updatedAt,
       ],
     );
-
-    return result;
   }
 
   Future<int> insertOrder({
@@ -96,7 +89,7 @@ class Queries {
     required dynamic date,
     required dynamic dated,
   }) async {
-    final result = await db.rawInsert(
+    return await db.rawInsert(
       'INSERT INTO orders VALUES (?, ?, ?, ?, ?)',
       [
         id,
@@ -107,6 +100,16 @@ class Queries {
         date,
         dated,
       ],
+    );
+  }
+
+  Future<int> updateOrdersTotalByCustomerId(
+    int $arg2, {
+    required double total,
+  }) async {
+    final result = await db.rawUpdate(
+      'UPDATE orders SET total = ? WHERE customer_id = ?',
+      [total, $arg2],
     );
 
     return result;

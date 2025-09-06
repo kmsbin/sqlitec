@@ -8,10 +8,11 @@ control and fully aware of what is happening. There is no magic code, no surpris
 This plugin works on any operating system and can be used with [sqflite](https://pub.dev/packages/sqflite) and [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi).
 ## Features
 
-Use this plugin in your dart application to:
-- Create classes from you tables.
-- Call your queries as a simple dart method ensuring type safety.
-- Consume data from your database without need to worry about type casting and all the boilerplate.
+Use this plugin in your Dart application to:
+- Automatically generate Dart classes from your database tables.
+- Call your queries as simple, type-safe Dart methods.
+- Enjoy type-safe query arguments, ensuring correct types at compile time.
+- Work with your database easily, without manual type casting or boilerplate code.
 
 ## Getting started
 
@@ -28,7 +29,7 @@ create table customers (
     status varchar not null default ''
 );
 
---name getCustomerByName :one
+--name: getCustomerByName :one
 select * from customers where name = ? and status = :status;
 
 --name: insertCustomer :exec

@@ -1,29 +1,28 @@
-import 'package:sqlitec/src/code_builders/from_json_builder.dart';
-import 'package:sqlitec/src/code_builders/to_json_builder.dart';
-import 'package:sqlitec/src/code_builders/to_string_builder.dart';
+import 'package:code_builder/code_builder.dart' as cb;
 import 'package:sqlitec/src/dql_analyzer/table_analyzer.dart';
 import 'package:sqlitec/src/type_converters/dart_type_generator/dart_type_generator.dart';
 import 'package:sqlparser/sqlparser.dart';
 import 'package:change_case/change_case.dart';
 import 'package:sqlparser/utils/node_to_text.dart';
-import '../code_builders/class_builder.dart';
-import '../code_builders/class_field_builder.dart';
 import 'registers.dart';
 import '../type_converters/string_to_basic_type.dart';
 import '../type_converters/string_to_dart_type.dart';
 
-class CreateTableRegister implements Register<CreateTableStatement> {
+class CreateTableRegister implements DdlRegister<CreateTableStatement> {
   final SqlEngine engine;
   final CmdAnalyzer analyzer;
 
-  CreateTableRegister(this.engine, this.analyzer);
+  const CreateTableRegister(
+    this.engine,
+    this.analyzer,
+  );
 
   @override
-  String register(stmt) {
+  cb.Class createTable(stmt) {
     _registerTableStatement(stmt);
     _registerTableAnalysis(stmt);
 
-    return _convertTableToDartClass(stmt);
+    return _convertTableToClass(stmt);
   }
 
   void _registerTableStatement(CreateTableStatement stmt) {
@@ -40,43 +39,54 @@ class CreateTableRegister implements Register<CreateTableStatement> {
     engine.registerTable(table);
   }
 
-  String _convertTableToDartClass(CreateTableStatement stmt) {
-    final columnsAndConverters =
-        stmt.columns.map(SqlColumnGeneratorDto.fromColumn).toList();
+  cb.Class _convertTableToClass(CreateTableStatement stmt) {
     final clazzName = stmt.createdName.toPascalCase();
-    final clazz = ClassBuilder(name: clazzName, methods: [
-      FromJsonBuilder(columnsAndConverters),
-      ToJsonBuilder(columnsAndConverters),
-      ToStringBuilder(columnsAndConverters, clazzName),
-    ], fields: [
-      ClassFieldBuilder(
-        name: '\$tableName',
-        dartType: 'String',
-        defaultValue: "'${stmt.createdName}'",
-        isStatic: true,
-        isConst: true,
-      ),
-      ClassFieldBuilder(
-        name: '\$createTableStatement',
-        dartType: 'String',
-        defaultValue: "'${stmt.toSql().replaceAll("'", r"\'")}'",
-        isConst: true,
-        isStatic: true,
-      ),
-      for (final converter in columnsAndConverters)
-        ClassFieldBuilder(
-          name: converter.fieldName,
-          dartType: converter.generator.type,
-          isNullable: converter.generator.isNullable,
-        ),
-    ]);
+    final columnsAndConverters =
+        stmt.columns.map(SqlColumnGeneratorDto.new).toList();
 
-    return clazz.build();
+    return cb.Class(
+      (builder) => builder
+        ..name = clazzName
+        ..constructors.addAll([
+          _constructor(columnsAndConverters),
+          _fromJsonConstructor(clazzName, columnsAndConverters),
+        ])
+        ..methods.add(_toJsonMethod(columnsAndConverters))
+        ..fields.addAll(
+          [
+            cb.Field(
+              (builder) => builder
+                ..name = r'$tableName'
+                ..type = cb.refer('String')
+                ..static = true
+                ..modifier = cb.FieldModifier.constant
+                ..assignment = cb.Code("'${stmt.createdName}'"),
+            ),
+            cb.Field(
+              (builder) => builder
+                ..name = r'$createTableStatement'
+                ..type = cb.refer('String')
+                ..static = true
+                ..modifier = cb.FieldModifier.constant
+                ..assignment =
+                    cb.Code("'${stmt.toSql().replaceAll("'", r"\'")}'"),
+            ),
+            for (final converter in columnsAndConverters)
+              cb.Field(
+                (builder) => builder
+                  ..name = converter.fieldName
+                  ..modifier = cb.FieldModifier.final$
+                  ..type = cb.refer(converter.generator.type),
+              )
+          ],
+        ),
+    );
   }
 
   void _registerTableAnalysis(CreateTableStatement stmt) {
     final columnsAndConverters =
-        stmt.columns.map(SqlColumnGeneratorDto.fromColumn).toList();
+        stmt.columns.map(SqlColumnGeneratorDto.new).toList();
+        
     final tableAnalisis = TableAnalyzer(
       name: stmt.createdName.toPascalCase(),
       columns: [
@@ -89,6 +99,68 @@ class CreateTableRegister implements Register<CreateTableStatement> {
     );
     analyzer.addTable(tableAnalisis);
   }
+
+  cb.Method _toJsonMethod(List<SqlColumnGeneratorDto> fields) {
+    final buffer = StringBuffer('return {\n');
+    for (final field in fields) {
+      buffer.writeln(
+          "  '${field.columnName}': ${field.generator.toJson(field.fieldName)},");
+    }
+    buffer.writeln('};');
+
+    final method = cb.Method(
+      (builder) => builder
+        ..name = 'toJson'
+        ..body = cb.Code(buffer.toString())
+        ..returns = cb.refer('Map<String, dynamic>'),
+    );
+
+    return method;
+  }
+
+  cb.Constructor _constructor(List<SqlColumnGeneratorDto> fields) {
+    return cb.Constructor(
+      (builder) => builder
+        ..optionalParameters.addAll([
+          for (final converter in fields)
+            cb.Parameter((builder) => builder
+              ..name = converter.fieldName
+              ..named = true
+              ..toThis = true
+              ..required = !converter.generator.isNullable)
+        ]),
+    );
+  }
+
+  String _getJsonMapArg(String field) => "data['$field']";
+
+  cb.Constructor _fromJsonConstructor(
+      String className, List<SqlColumnGeneratorDto> fields) {
+    final data = cb.refer(className).newInstance([], {
+      for (final dto in fields)
+        dto.fieldName: cb.CodeExpression(
+          cb.Code(
+            dto.generator.fromJson(_getJsonMapArg(dto.columnName)),
+          ),
+        ),
+    });
+
+    return cb.Constructor(
+      (builder) => builder
+        ..name = 'fromJson'
+        ..factory = true
+        ..requiredParameters.add(
+          cb.Parameter(
+            (builder) => builder
+              ..name = 'data'
+              ..type = cb.refer(
+                'Map<String, dynamic>',
+              ),
+          ),
+        )
+        ..body = data.code,
+    );
+  }
 }
 
 class SqlColumnGeneratorDto {
@@ -96,16 +168,8 @@ class SqlColumnGeneratorDto {
   final String fieldName;
   final DartTypeGenerator generator;
 
-  SqlColumnGeneratorDto(
-      {required this.columnName,
-      required this.fieldName,
-      required this.generator});
-
-  factory SqlColumnGeneratorDto.fromColumn(ColumnDefinition definition) {
-    return SqlColumnGeneratorDto(
-      columnName: definition.columnName,
-      fieldName: definition.columnName.toCamelCase(),
-      generator: columnDefinitionToGenerator(definition),
-    );
-  }
+  SqlColumnGeneratorDto(ColumnDefinition definition)
+      : columnName = definition.columnName,
+        fieldName = definition.columnName.toCamelCase(),
+        generator = columnDefinitionToGenerator(definition);
 }

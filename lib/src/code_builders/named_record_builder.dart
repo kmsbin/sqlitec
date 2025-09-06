@@ -3,37 +3,38 @@ import 'package:sqlitec/src/dql_analyzer/table_analyzer.dart';
 import 'package:sqlitec/src/type_converters/dart_type_generator/dart_type_generator.dart';
 
 abstract class ReturnBuilder {
-  String buildType();
-  String buildReturnFromJson(String jsonMapName, {required String padding});
+  const ReturnBuilder();
 
-  String getReturnByMode(ReturnMode mode, {int leftSpaceCount = 4}) {
-    final spaces = ' ' * leftSpaceCount;
+  String get buildType;
+  String buildReturnFromJson(String jsonMapName);
+
+  String getReturnByMode(ReturnMode mode) {
     return switch (mode) {
       ReturnMode.one => 'if (result.isEmpty) return null;\n'
           'final resultFirst = result.first;\n'
-          'return ${buildReturnFromJson('resultFirst', padding: '')};',
+          'return ${buildReturnFromJson('resultFirst')};',
       ReturnMode.many =>
-        'return result.map((e) => ${buildReturnFromJson('e', padding: spaces)}).toList();',
-      _ => '',
+        'return result.map((e) => ${buildReturnFromJson('e')}).toList();',
+      ReturnMode.exec => '',
     };
   }
 
   String getReturnType(AnalyzedComment comment) {
     return switch (comment.mode) {
-      ReturnMode.many => 'Future<List<${buildType()}>>',
-      ReturnMode.one => 'Future<${buildType()}>',
-      _ => 'Future<void>',
+      ReturnMode.many => 'Future<List<$buildType>>',
+      ReturnMode.one => 'Future<$buildType>',
+      ReturnMode.exec => 'Future<void>',
     };
   }
 }
 
-class NamedRecordBuilder extends ReturnBuilder {
+class NamedRecordReturnBuilder extends ReturnBuilder {
+  const NamedRecordReturnBuilder(this.params);
+
   final List<({String name, DartTypeGenerator generator})> params;
 
-  NamedRecordBuilder(this.params);
-
   @override
-  String buildType() {
+  String get buildType {
     final padding = ' ' * 4;
     final fields =
         params.map((e) => '$padding${e.generator.type} ${e.name},').join('\n');
@@ -43,38 +44,38 @@ class NamedRecordBuilder extends ReturnBuilder {
   }
 
   @override
-  String buildReturnFromJson(String jsonMapName, {required String padding}) {
+  String buildReturnFromJson(String jsonMapName) {
     return '''(
-${params.map((e) => '$padding  ${e.name}: ${e.generator.fromJson("$jsonMapName['${e.name}']")},').join('\n')}    
+${params.map((e) => '${e.name}: ${e.generator.fromJson("$jsonMapName['${e.name}']")},').join('\n')}    
     )''';
   }
 }
 
-class SingleTableBuilder extends ReturnBuilder {
+class TableReturnBuilder extends ReturnBuilder {
   final TableAnalyzer table;
 
-  SingleTableBuilder(this.table);
+  const TableReturnBuilder(this.table);
 
   @override
-  String buildType() => '${table.name}?';
+  String get buildType => '${table.name}?';
 
   @override
-  String buildReturnFromJson(String jsonMapName, {required String padding}) {
+  String buildReturnFromJson(String jsonMapName) {
     return '${table.name}.fromJson($jsonMapName)';
   }
 }
 
-class SingleColumnBuilder extends ReturnBuilder {
+class ColumnReturnBuilder extends ReturnBuilder {
   final String name;
   final DartTypeGenerator generator;
 
-  SingleColumnBuilder(this.name, this.generator);
+  const ColumnReturnBuilder(this.name, this.generator);
 
   @override
-  String buildType() => '${generator.type}?';
+  String get buildType => '${generator.type}?';
 
   @override
-  String buildReturnFromJson(String jsonMapName, {required String padding}) {
+  String buildReturnFromJson(String jsonMapName) {
     return generator.fromJson("$jsonMapName['$name']");
   }
 }

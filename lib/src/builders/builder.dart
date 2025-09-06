@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:build/build.dart';
+import 'package:code_builder/code_builder.dart' as cb;
 import 'package:glob/glob.dart';
-import 'package:sqlitec/src/code_builders/class_builder.dart';
 import 'package:sqlitec/src/dql_analyzer/comment_analyzer.dart';
 import 'package:sqlitec/src/exceptions/analysis_sql_cmd_exception.dart';
 import 'package:sqlitec/src/exceptions/parser_sql_cmd_exeception.dart';
@@ -11,11 +11,14 @@ import 'package:sqlitec/src/registers/create_table_register.dart';
 import 'package:sqlitec/src/registers/delete_register.dart';
 import 'package:sqlitec/src/registers/update_register.dart';
 import 'package:sqlparser/sqlparser.dart';
-
-import '../code_builders/class_field_builder.dart';
+import 'package:dart_style/dart_style.dart';
 import '../dql_analyzer/table_analyzer.dart';
 import '../registers/insert_register.dart';
 import '../registers/select_register.dart';
+
+final _dartfmt = DartFormatter(
+  languageVersion: DartFormatter.latestLanguageVersion,
+);
 
 class SqliteGenerator extends Builder {
   final cmdAnalyzer = CmdAnalyzer();
@@ -50,7 +53,9 @@ class SqliteGenerator extends Builder {
   }
 
   Future<List<ParseResult>> _getContents(
-      BuildStep buildStep, SqlEngine engine) async {
+    BuildStep buildStep,
+    SqlEngine engine,
+  ) async {
     final injectableConfigFiles = Glob("lib/**.sqlitec.json");
 
     final contents = <String>[];
@@ -73,26 +78,31 @@ class SqliteGenerator extends Builder {
   }
 
   String _writeDdlStmts(List<ParseResult> cmds, SqlEngine engine) {
-    final buffer = StringBuffer();
-    for (final stmt
-        in cmds.where((e) => e.rootNode is TableInducingStatement)) {
+    final classes = <cb.Class>[];
+    final stmts = cmds.where((e) => e.rootNode is TableInducingStatement);
+
+    for (final stmt in stmts) {
       if (stmt.errors.isNotEmpty) {
         throw ParserSqlCmdException(stmt.errors);
       }
-      final result = switch (stmt.rootNode) {
-        CreateTableStatement stmt =>
-          CreateTableRegister(engine, cmdAnalyzer).register(stmt),
-        _ => null,
-      };
-      if (result != null) {
-        buffer.write(result);
+      final rootNode = stmt.rootNode;
+      if (rootNode is CreateTableStatement) {
+        final result =
+            CreateTableRegister(engine, cmdAnalyzer).createTable(rootNode);
+
+        classes.add(result);
       }
     }
-    return buffer.toString();
+
+    final lib = cb.Library((builder) => builder.body.addAll(classes))
+        .accept(cb.DartEmitter())
+        .toString();
+
+    return _dartfmt.format(lib);
   }
 
   String _writeDqlStmts(List<ParseResult> cmds, SqlEngine engine) {
-    final rawMethods = <String>[];
+    final methods = <cb.Method>[];
 
     for (final stmt in cmds) {
       if (stmt.errors.isNotEmpty) {
@@ -101,7 +111,7 @@ class SqliteGenerator extends Builder {
       final comment = CommentAnalysis.getCommentAnalize(stmt.sql);
 
       if (comment != null) {
-        if (switch (stmt.rootNode) {
+        final method = switch (stmt.rootNode) {
           SelectStatement stmt =>
             SelectRegister(engine, comment, cmdAnalyzer).register(stmt),
           InsertStatement stmt =>
@@ -110,18 +120,38 @@ class SqliteGenerator extends Builder {
             UpdateRegister(engine, comment, cmdAnalyzer).register(stmt),
           DeleteStatement stmt =>
             DeleteRegister(engine, comment, cmdAnalyzer).register(stmt),
-          _ => null,
-        }
-            case final generatedCode?) {
-          rawMethods.add(generatedCode);
+          _ => null
+        };
+        if (method != null) {
+          methods.add(method);
         }
       }
     }
-    return ClassBuilder(
-      name: 'Queries',
-      fields: [ClassFieldBuilder(name: 'db', dartType: 'DatabaseExecutor')],
-      rawMethods: rawMethods,
-    ).build();
+
+    final clazz = cb.Class(
+      (builder) => builder
+        ..name = 'Queries'
+        ..methods.addAll(methods)
+        ..constructors.add(
+          cb.Constructor((builder) => builder
+            ..constant = true
+            ..requiredParameters.add(
+              cb.Parameter((builder) => builder
+                ..toThis = true
+                ..name = 'db'),
+            )),
+        )
+        ..fields.add(
+          cb.Field(
+            (builder) => builder
+              ..modifier = cb.FieldModifier.final$
+              ..name = 'db'
+              ..type = cb.refer('DatabaseExecutor'),
+          ),
+        ),
+    );
+
+    return _dartfmt.format(clazz.accept(cb.DartEmitter()).toString());
   }
 
   Future<void> _writeInQueriesFile(BuildStep buildStep, data) async {
