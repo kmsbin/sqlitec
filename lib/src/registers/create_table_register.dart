@@ -86,7 +86,7 @@ class CreateTableRegister implements DdlRegister<CreateTableStatement> {
   void _registerTableAnalysis(CreateTableStatement stmt) {
     final columnsAndConverters =
         stmt.columns.map(SqlColumnGeneratorDto.new).toList();
-        
+
     final tableAnalisis = TableAnalyzer(
       name: stmt.createdName.toPascalCase(),
       columns: [

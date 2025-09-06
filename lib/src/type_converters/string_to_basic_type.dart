@@ -53,9 +53,18 @@ String getDartTypeByBasicType(BasicType? type) {
 
 DartTypeGenerator getDartGeneratorFromBasicType(ResolvedType? type) {
   final generator = switch (type?.type) {
-    BasicType.int => (const IntTypeGenerator(), const IntNullableTypeGenerator()),
-    BasicType.real => (const DoubleTypeGenerator(), const DoubleNullableTypeGenerator()),
-    BasicType.text => (const StringTypeGenerator(), const StringNullableTypeGenerator()),
+    BasicType.int => (
+        const IntTypeGenerator(),
+        const IntNullableTypeGenerator()
+      ),
+    BasicType.real => (
+        const DoubleTypeGenerator(),
+        const DoubleNullableTypeGenerator()
+      ),
+    BasicType.text => (
+        const StringTypeGenerator(),
+        const StringNullableTypeGenerator()
+      ),
     _ => (const ObjectTypeGenerator(), const ObjectNullableTypeGenerator()),
   };
   if (type?.nullable ?? false) {

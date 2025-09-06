@@ -89,16 +89,14 @@ class SelectRegister implements ActionRegister<SelectStatement> {
     final returns = refer(params.getReturnType(comment));
     final code = Code(buffer.toString());
 
-    print(args.positional);
-    print(args.named);
-
     return Method(
       (builder) => builder
         ..name = comment.name
         ..returns = returns
         ..modifier = MethodModifier.async
         ..requiredParameters.addAll(args.positional)
-        ..optionalParameters.addAll(args.named) // there is a bug on code builder: https://github.com/dart-lang/tools/issues/1126
+        ..optionalParameters.addAll(args
+            .named) // there is a bug on code builder: https://github.com/dart-lang/tools/issues/1126
         ..modifier = MethodModifier.async
         ..body = code,
     );

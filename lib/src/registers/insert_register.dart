@@ -63,13 +63,11 @@ class InsertRegister implements ActionRegister<InsertStatement> {
         ..body = Code(code)
         ..optionalParameters.addAll([
           for (final arg in args)
-            Parameter(
-              (builder) => builder
-                ..required = true
-                ..type = refer(arg.dartType)
-                ..name = arg.sqlName.toCamelCase()
-                ..named = true
-            )
+            Parameter((builder) => builder
+              ..required = true
+              ..type = refer(arg.dartType)
+              ..name = arg.sqlName.toCamelCase()
+              ..named = true)
         ]),
     );
   }
