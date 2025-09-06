@@ -67,10 +67,10 @@ final class SqlExpressionsArgumentsBuilder {
 
   bool isExpressionValid(Expression exp) =>
       (exp is NumberedVariable && exp.span?.text == '?') ||
-      exp is ColonNamedVariable;
+      exp is NamedVariable;
 
   String? getNameFromSpan(Expression argExp) {
-    if (argExp is ColonNamedVariable) {
+    if (argExp is NamedVariable) {
       return argExp.name.substring(1);
     }
     return null;

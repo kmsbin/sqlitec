@@ -10,14 +10,14 @@ class Orders {
   });
 
   factory Orders.fromJson(Map<String, dynamic> data) => Orders(
-        id: (data['id'] as num).toInt(),
-        total: (data['total'] as num).toDouble(),
-        customerId: (data['customer_id'] as num?)?.toInt(),
-        customerName: data['customer_name'] as String?,
-        customerStatus: data['customer_status'] as String,
-        date: DateTime.parse(data['date']),
-        dated: data['dated'] == null ? null : DateTime.parse(data['dated']),
-      );
+    id: (data['id'] as num).toInt(),
+    total: (data['total'] as num).toDouble(),
+    customerId: (data['customer_id'] as num?)?.toInt(),
+    customerName: data['customer_name'] as String?,
+    customerStatus: data['customer_status'] as String,
+    date: DateTime.parse(data['date']),
+    dated: data['dated'] == null ? null : DateTime.parse(data['dated']),
+  );
 
   static const String $tableName = 'orders';
 
@@ -60,11 +60,11 @@ class Customers {
   });
 
   factory Customers.fromJson(Map<String, dynamic> data) => Customers(
-        id: (data['id'] as num).toInt(),
-        name: data['name'] as String,
-        status: data['status'] as String,
-        updatedAt: DateTime.parse(data['updated_at']),
-      );
+    id: (data['id'] as num).toInt(),
+    name: data['name'] as String,
+    status: data['status'] as String,
+    updatedAt: DateTime.parse(data['updated_at']),
+  );
 
   static const String $tableName = 'customers';
 
@@ -98,11 +98,11 @@ class Payments {
   });
 
   factory Payments.fromJson(Map<String, dynamic> data) => Payments(
-        id: (data['id'] as num).toInt(),
-        customerId: (data['customer_id'] as num).toInt(),
-        ordersId: (data['orders_id'] as num).toInt(),
-        amount: (data['amount'] as num).toDouble(),
-      );
+    id: (data['id'] as num).toInt(),
+    customerId: (data['customer_id'] as num).toInt(),
+    ordersId: (data['orders_id'] as num).toInt(),
+    amount: (data['amount'] as num).toDouble(),
+  );
 
   static const String $tableName = 'payments';
 
