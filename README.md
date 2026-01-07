@@ -7,6 +7,9 @@ control and fully aware of what is happening. There is no magic code, no surpris
 
 This plugin works on any operating system and can be used with [sqflite](https://pub.dev/packages/sqflite) and [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi).
 
+> **Note:**  
+> Support for [sqlite3](https://pub.dev/packages/sqlite3) is planned for a future release.
+
 ## 📚 [Official Documentation](https://kmsbin.github.io/sqlitec/)
 
 ## Features
