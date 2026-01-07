@@ -1,0 +1,12 @@
+site_name: sqlitec
+nav:
+  - Getting started: index.md
+  - Installation: installation.md
+  - Basic Usage: usage.md
+  - Type Map: type_map.md
+theme:
+  name: readthedocs
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
