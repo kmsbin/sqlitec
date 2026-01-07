@@ -10,9 +10,8 @@ abstract class ReturnBuilder {
 
   String getReturnByMode(ReturnMode mode) {
     return switch (mode) {
-      ReturnMode.one => 'if (result.isEmpty) return null;\n'
-          'final resultFirst = result.first;\n'
-          'return ${buildReturnFromJson('resultFirst')};',
+      ReturnMode.one => 'if (result.isEmpty) return null;\n\n'
+          'return ${buildReturnFromJson('result.first')};',
       ReturnMode.many =>
         'return result.map((e) => ${buildReturnFromJson('e')}).toList();',
       ReturnMode.exec => '',

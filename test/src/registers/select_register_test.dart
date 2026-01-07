@@ -32,8 +32,8 @@ void main() {
 
   final cmdAnalyzer = CmdAnalyzer();
 
-  group('Ensure all string comparisons are generated parameters correctly', () {
-    test('Generate params to like exp', () {
+  group('Ensure all string comparisons are generating parameters correctly', () {
+    test('Generate params to like expression', () {
       const methodName = 'methodTestName';
       final register = SelectRegister(
         engine,
@@ -200,6 +200,73 @@ void main() {
       expect(param.required, true);
 
       expect(param.type?.symbol, 'String');
+    });
+  });
+
+  group('Ensure limit expressions are generating parameters correctly', () {
+    test('Generate named param for limit clause', () {
+      const methodName = 'methodTestName';
+      final register = SelectRegister(
+        engine,
+        AnalyzedComment(name: 'methodTestName', mode: ReturnMode.one),
+        cmdAnalyzer,
+      );
+      const selectCommand = r"select * from users limit :limitValue offset :offsetValue";
+      final result = engine.parse(selectCommand).rootNode as SelectStatement;
+
+      final selectMethod = register.register(result);
+
+      expect(selectMethod.name, equals(methodName));
+
+      final params = selectMethod.optionalParameters;
+
+      expect(params, hasLength(2));
+
+      final limitParam = params.first;
+
+      expect(limitParam.name, 'limitValue');
+      expect(limitParam.named, true);
+
+      final offsetParam = params.last;
+
+      expect(offsetParam.name, 'offsetValue');
+      expect(offsetParam.named, true);
+      expect(offsetParam.required, true);
+
+      expect(offsetParam.type!.symbol, 'int');
+    });
+
+    test('Generate positional param for limit and offset clause', () {
+      const methodName = 'methodTestName';
+      final register = SelectRegister(
+        engine,
+        AnalyzedComment(name: 'methodTestName', mode: ReturnMode.one),
+        cmdAnalyzer,
+      );
+      const selectCommand = r"select * from users limit ?, ?";
+      final result = engine.parse(selectCommand).rootNode as SelectStatement;
+
+      final selectMethod = register.register(result);
+
+      expect(selectMethod.name, equals(methodName));
+
+      final params = selectMethod.requiredParameters;
+
+      expect(params, hasLength(2));
+
+      final limitParam = params.first;
+
+      expect(limitParam.name, r'$arg1');
+      expect(limitParam.named, isFalse);
+
+      final offsetParam = params.last;
+
+      expect(offsetParam.name, r'$arg2');
+      expect(offsetParam.named, isFalse);
+      expect(offsetParam.required, isFalse);
+
+      expect(offsetParam.type?.symbol, 'int');
+      expect(limitParam.type?.symbol, 'int');
     });
   });
 }

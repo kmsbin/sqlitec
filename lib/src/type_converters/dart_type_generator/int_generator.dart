@@ -2,6 +2,7 @@ import 'dart_type_generator.dart';
 
 class IntTypeGenerator extends DartTypeGenerator {
   const IntTypeGenerator();
+
   @override
   String fromJson(String value) {
     return '($value as num).toInt()';
@@ -16,6 +17,7 @@ class IntTypeGenerator extends DartTypeGenerator {
 
 class IntNullableTypeGenerator extends DartTypeGenerator {
   const IntNullableTypeGenerator();
+
   @override
   String fromJson(String value) {
     return '($value as num?)?.toInt()';

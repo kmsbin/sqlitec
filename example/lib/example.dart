@@ -20,12 +20,15 @@ Future<void> main(List<String> arguments) async {
 
   final queries = Queries(db);
 
-  var id = await queries.insertCustumer(name: 'Kauli', status: 'registered');
+  var id = await queries.insertCustomer(name: 'Kauli', status: 'registered');
   print(id);
   await db.update('customers', {'updated_at': 'asdfasdfasdf'});
-  // final user = await queries.getCustumerByNameAndStatus('Kauli', status: 'registered');
-  final asdf =
-      await db.query('customers', where: 'name = ?', whereArgs: ['Kauli']);
+
+  final asdf = await db.query(
+    'customers',
+    where: 'name = ?',
+    whereArgs: ['Kauli'],
+  );
   print(jsonEncode(asdf));
   await db.close();
 }

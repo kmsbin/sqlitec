@@ -16,7 +16,7 @@ Use this plugin in your Dart application to:
 
 ## Getting started
 
-To use this plugin you will need sqflite or sqflite_common_ffi implementation.
+To use this plugin you will need the sqflite or sqflite_common_ffi implementation.
 
 ## Usage
 
@@ -25,11 +25,11 @@ Create a .sql file anywhere in your lib folder and write your custom SQL command
 ```sql
 create table customers (
     id integer primary key autoincrement,
-    name varchar not null default null,
+    name varchar not null default '',
     status varchar not null default ''
 );
 
---name: getCustomerByName :one
+--name: getCustomerByNameAndStatus :one
 select * from customers where name = ? and status = :status;
 
 --name: insertCustomer :exec
@@ -78,7 +78,7 @@ class Customers {
 
 ...
 // methods inside Queries class on sqlitec/queries.sqlitec.dart
-Future<Customers?> getCustumerByNameAndStatus(String $arg1, {
+Future<Customers?> getCustomerByNameAndStatus(String $arg1, {
   required String status,
 }) async {
     final result = await db.rawQuery(
@@ -87,8 +87,8 @@ Future<Customers?> getCustumerByNameAndStatus(String $arg1, {
     );
     
     if (result.isEmpty) return null;
-    final resultFirst = result.first;
-    return Customers.fromJson(resultFirst);
+
+    return Customers.fromJson(result.first);
 }
 
 Future<int> insertCustomer({

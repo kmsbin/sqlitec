@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:build/build.dart';
-import 'package:code_builder/code_builder.dart' as cb;
+import 'package:code_builder/code_builder.dart' as code_builder;
 import 'package:glob/glob.dart';
 import 'package:sqlitec/src/dql_analyzer/comment_analyzer.dart';
 import 'package:sqlitec/src/exceptions/analysis_sql_cmd_exception.dart';
@@ -78,7 +78,7 @@ class SqliteGenerator extends Builder {
   }
 
   String _writeDdlStmts(List<ParseResult> cmds, SqlEngine engine) {
-    final classes = <cb.Class>[];
+    final classes = <code_builder.Class>[];
     final stmts = cmds.where((e) => e.rootNode is TableInducingStatement);
 
     for (final stmt in stmts) {
@@ -94,15 +94,15 @@ class SqliteGenerator extends Builder {
       }
     }
 
-    final lib = cb.Library((builder) => builder.body.addAll(classes))
-        .accept(cb.DartEmitter())
+    final lib = code_builder.Library((builder) => builder.body.addAll(classes))
+        .accept(code_builder.DartEmitter())
         .toString();
 
     return _dartfmt.format(lib);
   }
 
   String _writeDqlStmts(List<ParseResult> cmds, SqlEngine engine) {
-    final methods = <cb.Method>[];
+    final methods = <code_builder.Method>[];
 
     for (final stmt in cmds) {
       if (stmt.errors.isNotEmpty) {
@@ -128,30 +128,30 @@ class SqliteGenerator extends Builder {
       }
     }
 
-    final clazz = cb.Class(
+    final clazz = code_builder.Class(
       (builder) => builder
         ..name = 'Queries'
         ..methods.addAll(methods)
         ..constructors.add(
-          cb.Constructor((builder) => builder
+          code_builder.Constructor((builder) => builder
             ..constant = true
             ..requiredParameters.add(
-              cb.Parameter((builder) => builder
+              code_builder.Parameter((builder) => builder
                 ..toThis = true
                 ..name = 'db'),
             )),
         )
         ..fields.add(
-          cb.Field(
+          code_builder.Field(
             (builder) => builder
-              ..modifier = cb.FieldModifier.final$
+              ..modifier = code_builder.FieldModifier.final$
               ..name = 'db'
-              ..type = cb.refer('DatabaseExecutor'),
+              ..type = code_builder.refer('DatabaseExecutor'),
           ),
         ),
     );
 
-    return _dartfmt.format(clazz.accept(cb.DartEmitter()).toString());
+    return _dartfmt.format(clazz.accept(code_builder.DartEmitter()).toString());
   }
 
   Future<void> _writeInQueriesFile(BuildStep buildStep, data) async {
@@ -171,6 +171,10 @@ class SqliteGenerator extends Builder {
   @override
   Map<String, List<String>> get buildExtensions => {
         r'$lib$': [
+          'sqlitec/queries.sqlitec.dart',
+          'sqlitec/schemas.sqlitec.dart',
+        ],
+        r'$sqlitec$': [
           'sqlitec/queries.sqlitec.dart',
           'sqlitec/schemas.sqlitec.dart',
         ]

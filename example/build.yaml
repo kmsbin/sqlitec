@@ -1,0 +1,8 @@
+targets:
+  $default:
+    sources:
+      - "lib/**"
+      # Add the directory you need to access
+      # - "sqlitec/**"
+      - "$sqlitec$"
+      - "$package$"

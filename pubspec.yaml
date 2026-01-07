@@ -9,11 +9,10 @@ topics:
 environment:
   sdk: '^3.3.0'
 
-version: 0.0.3
+version: 0.0.3+1
 
 dependencies:
   build: ^4.0.0
-  path: ^1.6.0
   source_gen: ^4.0.1
   glob: ^2.1.2
   sqlparser: ^0.41.2

@@ -8,26 +8,16 @@ class Queries {
 
   Future<Customers?> getCustumerByNameAndStatus(
     String $arg1, {
-    required String tatus,
+    required String status,
   }) async {
     final result = await db.rawQuery(
       'SELECT * FROM customers WHERE name = ? AND status = ?',
-      [$arg1, tatus],
+      [$arg1, status],
     );
 
     if (result.isEmpty) return null;
-    final resultFirst = result.first;
-    return Customers.fromJson(resultFirst);
-  }
 
-  Future<int> insertCustumer({
-    required String name,
-    required String status,
-  }) async {
-    return await db.rawInsert(
-      'INSERT INTO customers (name, status) VALUES (?, ?)',
-      [name, status],
-    );
+    return Customers.fromJson(result.first);
   }
 
   Future<List<Customers?>> getCustomersById(int $arg1) async {
@@ -46,33 +36,29 @@ class Queries {
     );
 
     if (result.isEmpty) return null;
-    final resultFirst = result.first;
-    return Customers.fromJson(resultFirst);
+
+    return Customers.fromJson(result.first);
   }
 
   Future<List<int?>> getCustomersIdWhereStatusIs({
-    required String tatus,
+    required String status,
   }) async {
     final result = await db.rawQuery(
       'SELECT id FROM customers WHERE status = ?',
-      [tatus],
+      [status],
     );
 
     return result.map((e) => (e['id'] as num).toInt()).toList();
   }
 
   Future<int> insertCustomer({
-    required int id,
     required String name,
     required String status,
-    required dynamic updatedAt,
   }) async {
-    return await db.rawInsert('INSERT INTO customers VALUES (?, ?, ?)', [
-      id,
-      name,
-      status,
-      updatedAt,
-    ]);
+    return await db.rawInsert(
+      'INSERT INTO customers (name, status) VALUES (?, ?)',
+      [name, status],
+    );
   }
 
   Future<int> insertOrder({
@@ -97,20 +83,20 @@ class Queries {
 
   Future<int> updateOrdersTotalByCustomerId(
     int $arg2, {
-    required double otal,
+    required double total,
   }) async {
     final result = await db.rawUpdate(
       'UPDATE orders SET total = ? WHERE customer_id = ?',
-      [otal, $arg2],
+      [total, $arg2],
     );
 
     return result;
   }
 
-  Future<int> deleteCustomerByName(String $arg1, {required String ame}) async {
+  Future<int> deleteCustomerByName(String $arg1, {required String name}) async {
     final result = await db.rawDelete(
       'DELETE FROM customers WHERE name = ? OR name = ?',
-      [$arg1, ame],
+      [$arg1, name],
     );
 
     return result;
@@ -118,7 +104,7 @@ class Queries {
 
   Future<int> deleteCustomersWithoutPayments() async {
     final result = await db.rawDelete(
-      'WITH custumers_without_payments AS (SELECT c.id FROM customers AS c LEFT JOIN payments AS p ON c.id = p.customer_id WHERE p.customer_id IS NULL) DELETE FROM customers WHERE id IN (SELECT id FROM custumers_without_payments)',
+      'WITH customers_without_payments AS (SELECT c.id FROM customers AS c LEFT JOIN payments AS p ON c.id = p.customer_id WHERE p.customer_id IS NULL) DELETE FROM customers WHERE id IN (SELECT id FROM customers_without_payments)',
       [],
     );
 

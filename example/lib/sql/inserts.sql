@@ -1,6 +1,5 @@
-
--- name: insertCustomer :exec
-insert into customers values(?, ?, ?);
+--name: insertCustomer :exec
+insert into customers(name, status) values (?, ?);
 
 --name: insertOrder :exec
 insert into orders values (?, ?, ?, ?, ?);

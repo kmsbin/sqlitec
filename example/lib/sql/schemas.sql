@@ -18,9 +18,6 @@ create table customers (
 --name: getCustumerByNameAndStatus :one
 select * from customers where name = ? and status = :status;
 
---name: insertCustumer :exec
-insert into customers(name, status) values (?, ?);
-
 create table payments (
     id int primary key,
     customer_id int not null,

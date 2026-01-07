@@ -14,7 +14,10 @@ class SqlFileReaderBuilder extends Builder {
 
   @override
   FutureOr<void> build(BuildStep buildStep) async {
+    print('Building SQL file: ${buildStep.inputId}');
+
     final id = buildStep.inputId;
+    print(id.package);
     final copy = id.changeExtension('.sqlitec.json');
     final content = await buildStep.readAsString(id);
     final jsonContent = {
