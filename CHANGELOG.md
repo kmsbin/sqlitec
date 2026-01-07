@@ -1,3 +1,7 @@
+## 0.0.4
+- Adds a public documentation
+- Adds support to limit parameter clause
+
 ## 0.0.3
 - Add and refine tests for parameter generation in select queries, including support for `like`, `glob`, `match`, `regexp`, and `in` expressions.
 - Ensure query arguments are generated with correct types and naming conventions.
