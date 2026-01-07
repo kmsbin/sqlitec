@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Basic Usage - sqlitec</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Basic Usage";
+        var mkdocs_page_input_path = "usage.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> sqlitec
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Getting started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Basic Usage</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-write-schema-and-queries-in-sql-files">1. Write schema and queries in .sql files</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-comment-directive-format">2. Comment directive format</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-how-parameters-map">3. How parameters map</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-how-nullability-works">4. How nullability works</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-expected-generated-api-example">5. Expected generated API (example)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#table-row-class">Table row class</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#queries-class">Queries class</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-generated-methods-reference">6. Generated Methods Reference</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#select">SELECT</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#insert">INSERT</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#update">UPDATE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#delete">DELETE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#return-types">Return Types</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#how-result-types-are-inferred">How result types are inferred</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-workflow">7. Workflow</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-recommendations">8. Recommendations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#9-about">9. About</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../type_map/">Type Map</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">sqlitec</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Basic Usage</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="basic-usage-as-simple-as-possible">Basic Usage — as simple as possible<a class="headerlink" href="#basic-usage-as-simple-as-possible" title="Permanent link">&para;</a></h1>
+<p>This project is inspired by <a href="https://sqlc.dev/">sqlc</a> and aims to generate simple, type-safe Dart code from your SQL files. It is <strong>not</strong> an ORM: it just generates boilerplate for you, so you can work with your database using plain SQL and strongly-typed Dart methods.</p>
+<hr />
+<h2 id="1-write-schema-and-queries-in-sql-files">1. Write schema and queries in <code>.sql</code> files<a class="headerlink" href="#1-write-schema-and-queries-in-sql-files" title="Permanent link">&para;</a></h2>
+<p>Place your <code>.sql</code> files under <code>lib/</code> (or another watched folder).</p>
+<p><strong>Example schema (<code>schemas.sql</code>):</strong></p>
+<pre><code class="language-sql">create table customers (
+  id integer primary key autoincrement,
+  name varchar not null,
+  status varchar not null,
+  updated_at timestamp not null
+);
+</code></pre>
+<p><strong>Example queries (<code>selects.sql</code>):</strong></p>
+<pre><code class="language-sql">-- name: getCustomerById :one
+select * from customers where id = ?;
+
+-- name: getCustomersByStatus :many
+select * from customers where status = :status;
+
+-- name: deleteOld :exec
+delete from customers where updated_at &lt; :olderThan;
+</code></pre>
+<hr />
+<h2 id="2-comment-directive-format">2. Comment directive format<a class="headerlink" href="#2-comment-directive-format" title="Permanent link">&para;</a></h2>
+<p>Place a comment directly above each SQL statement:</p>
+<ul>
+<li><code>-- name: methodName :one|:many|:exec</code></li>
+<li><code>:one</code>  → single nullable result (<code>Future&lt;T?&gt;</code>)</li>
+<li><code>:many</code> → list of results (<code>Future&lt;List&lt;T&gt;&gt;</code>)</li>
+<li><code>:exec</code> → execute-only (<code>Future&lt;int&gt;</code> — rows affected)</li>
+</ul>
+<hr />
+<h2 id="3-how-parameters-map">3. How parameters map<a class="headerlink" href="#3-how-parameters-map" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Positional <code>?</code> placeholders → positional parameters in method (<code>$arg1</code>, <code>$arg2</code>, ...).</li>
+<li>Example: <code>WHERE id = ?</code>  → method param: <code>int $arg1</code></li>
+<li>Named variables <code>:name</code> → required named Dart parameters.</li>
+<li>Example: <code>WHERE status = :status</code> → method param: <code>required String status</code></li>
+<li><code>LIMIT</code>/<code>OFFSET</code> variables → <code>int</code></li>
+<li><code>LIKE</code>/<code>GLOB</code>/<code>MATCH</code>/<code>REGEXP</code> → <code>String</code></li>
+</ul>
+<hr />
+<h2 id="4-how-nullability-works">4. How nullability works<a class="headerlink" href="#4-how-nullability-works" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Column declared <code>NOT NULL</code> or <code>PRIMARY KEY</code> → non-nullable Dart field (<code>int</code>, <code>String</code>).</li>
+<li>Otherwise → nullable Dart field (<code>int?</code>, <code>String?</code>, etc.)</li>
+</ul>
+<hr />
+<h2 id="5-expected-generated-api-example">5. Expected generated API (example)<a class="headerlink" href="#5-expected-generated-api-example" title="Permanent link">&para;</a></h2>
+<h3 id="table-row-class">Table row class<a class="headerlink" href="#table-row-class" title="Permanent link">&para;</a></h3>
+<pre><code class="language-dart">class Customer {
+  final int id;
+  final String name;
+  final String status;
+  final String updatedAt; // stored as ISO string
+
+  Customer({
+    required this.id,
+    required this.name,
+    required this.status,
+    required this.updatedAt,
+  });
+
+  factory Customer.fromJson(Map&lt;String, dynamic&gt; json) =&gt; ...;
+  Map&lt;String, dynamic&gt; toJson() =&gt; ...;
+}
+</code></pre>
+<h3 id="queries-class">Queries class<a class="headerlink" href="#queries-class" title="Permanent link">&para;</a></h3>
+<pre><code class="language-dart">class Queries {
+  final DatabaseExecutor db;
+  Queries(this.db);
+
+  Future&lt;Customer?&gt; getCustomerById(int $arg1) async { ... }
+  Future&lt;List&lt;Customer&gt;&gt; getCustomersByStatus({required String status}) async { ... }
+  Future&lt;int&gt; deleteOld({required String olderThan}) async { ... }
+}
+</code></pre>
+<hr />
+<h2 id="6-generated-methods-reference">6. Generated Methods Reference<a class="headerlink" href="#6-generated-methods-reference" title="Permanent link">&para;</a></h2>
+<p>This section explains all generated methods for each SQL operation—<strong>SELECT</strong>, <strong>INSERT</strong>, <strong>UPDATE</strong>, and <strong>DELETE</strong>—with clear examples for both named and unnamed parameters. These methods are generated based on the SQL statements and their parameter styles in your <code>.sql</code> files.</p>
+<hr />
+<h3 id="select">SELECT<a class="headerlink" href="#select" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Unnamed (positional) parameter</strong>:</li>
+</ul>
+<pre><code class="language-sql">-- name: getCustomerById :one
+SELECT * FROM customers WHERE id = ?;
+</code></pre>
+<pre><code class="language-dart">Future&lt;Customer?&gt; getCustomerById(int $arg1) async { ... }
+</code></pre>
+<p><em>Use when your SQL uses <code>?</code> placeholders. The Dart method will have positional parameters named <code>$arg1</code>, <code>$arg2</code>, etc.</em></p>
+<ul>
+<li><strong>Named parameter:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: getCustomersByStatus :many
+SELECT * FROM customers WHERE status = :status;
+</code></pre>
+<pre><code class="language-dart">Future&lt;List&lt;Customer&gt;&gt; getCustomersByStatus({required String status}) async { ... }
+</code></pre>
+<p><em>Use when your SQL uses <code>:name</code> placeholders. The Dart method will have required named parameters.</em></p>
+<ul>
+<li><strong>Multiple parameters (mixed):</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: getByNameAndStatus :one
+SELECT * FROM customers WHERE name = ? AND status = :status;
+</code></pre>
+<pre><code class="language-dart">Future&lt;Customer?&gt; getByNameAndStatus(String $arg1, {required String status}) async { ... }
+</code></pre>
+<p><em>You can mix positional and named parameters. The Dart method will reflect this.</em></p>
+<hr />
+<h3 id="insert">INSERT<a class="headerlink" href="#insert" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Positional parameters:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: insertCustomer :exec
+INSERT INTO customers(name, status) VALUES (?, ?);
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; insertCustomer(String $arg1, String $arg2) async { ... }
+</code></pre>
+<p><em>For <code>?</code> placeholders, parameters are positional.</em></p>
+<ul>
+<li><strong>Named parameters:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: insertCustomerNamed :exec
+INSERT INTO customers(name, status) VALUES (:name, :status);
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; insertCustomerNamed({required String name, required String status}) async { ... }
+</code></pre>
+<p><em>For <code>:name</code> placeholders, parameters are named.</em></p>
+<hr />
+<h3 id="update">UPDATE<a class="headerlink" href="#update" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Named parameters:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: updateStatus :exec
+UPDATE customers SET status = :status WHERE id = :id;
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; updateStatus({required String status, required int id}) async { ... }
+</code></pre>
+<ul>
+<li><strong>Mixed parameters:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: updateStatusMixed :exec
+UPDATE customers SET status = ? WHERE id = :id;
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; updateStatusMixed(String $arg1, {required int id}) async { ... }
+</code></pre>
+<hr />
+<h3 id="delete">DELETE<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Positional parameter:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: deleteById :exec
+DELETE FROM customers WHERE id = ?;
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; deleteById(int $arg1) async { ... }
+</code></pre>
+<ul>
+<li><strong>Named parameter:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: deleteByStatus :exec
+DELETE FROM customers WHERE status = :status;
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; deleteByStatus({required String status}) async { ... }
+</code></pre>
+<ul>
+<li><strong>Multiple parameters:</strong></li>
+</ul>
+<pre><code class="language-sql">-- name: deleteByName :exec
+DELETE FROM customers WHERE name = ? OR name = :name;
+</code></pre>
+<pre><code class="language-dart">Future&lt;int&gt; deleteByName(String $arg1, {required String name}) async { ... }
+</code></pre>
+<hr />
+<h3 id="return-types">Return Types<a class="headerlink" href="#return-types" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>:one</code> → Returns a single row or <code>null</code> (<code>Future&lt;T?&gt;</code>)</li>
+<li><code>:many</code> → Returns a list of rows (<code>Future&lt;List&lt;T&gt;&gt;</code>)</li>
+<li><code>:exec</code> → Returns the number of rows affected (<code>Future&lt;int&gt;</code>)</li>
+</ul>
+<h4 id="how-result-types-are-inferred">How result types are inferred<a class="headerlink" href="#how-result-types-are-inferred" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>Full table selection:</strong><br />
+  If your query selects all columns from a table (e.g., <code>SELECT * FROM customers</code>), the generated method returns an instance of the corresponding Dart class (e.g., <code>Customer</code>).</p>
+</li>
+<li>
+<p><strong>Partial table selection:</strong><br />
+  If your query selects only some columns from a table (e.g., <code>SELECT id, name FROM customers</code>), the generated method returns a Dart record containing just those fields:
+  <code>dart
+  Future&lt;(int id, String name)?&gt; getIdAndName(int $arg1) async { ... }</code></p>
+</li>
+<li>
+<p><strong>Joins or subqueries:</strong><br />
+  If your query selects columns from multiple tables or includes computed columns (e.g., joins, subqueries, expressions), the return type is inferred from the selected columns:</p>
+<ul>
+<li><strong>Single column:</strong><br />
+  If only one column is selected (e.g., <code>SELECT COUNT(*) FROM customers</code>), the method returns that column’s Dart type (e.g., <code>Future&lt;int?&gt;</code>).</li>
+<li><strong>Multiple columns:</strong><br />
+  If multiple columns are selected (e.g., <code>SELECT c.id, o.total FROM customers c JOIN orders o ON ...</code>), the method returns a Dart record with those fields:
+  <code>dart
+  Future&lt;(int id, double total)?&gt; getCustomerOrderTotal(int $arg1) async { ... }</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Tip:</strong><br />
+Dart records provide a concise way to work with queries that return multiple fields but do not map directly to a table class.</p>
+<hr />
+<p><strong>Tip:</strong><br />
+Use named parameters for clarity and maintainability, especially for queries with multiple arguments.</p>
+<hr />
+<h2 id="7-workflow">7. Workflow<a class="headerlink" href="#7-workflow" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Edit <code>.sql</code> files → run build_runner → import generated files → call methods on the generated <code>Queries</code> instance.</li>
+</ul>
+<hr />
+<h2 id="8-recommendations">8. Recommendations<a class="headerlink" href="#8-recommendations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Use explicit SQL types to keep method signatures stable.</li>
+<li>Store dates as ISO 8601 strings for cross-platform consistency; convert to <code>DateTime</code> in app code if needed.</li>
+</ul>
+<hr />
+<h2 id="9-about">9. About<a class="headerlink" href="#9-about" title="Permanent link">&para;</a></h2>
+<p>This project is inspired by <a href="https://sqlc.dev/">sqlc</a> and is designed to generate simple, explicit Dart types and query methods from your SQL files. It is not an ORM and does not hide SQL from you — you always write and see your SQL, but get strong typing and less boilerplate in Dart.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../installation/" class="btn btn-neutral float-left" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../type_map/" class="btn btn-neutral float-right" title="Type Map">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../installation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../type_map/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
