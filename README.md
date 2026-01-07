@@ -6,6 +6,9 @@ Instead, it simply writes the tedious parts of database handling for you, leavin
 control and fully aware of what is happening. There is no magic code, no surprises, just simple, and idiomatic dart code.
 
 This plugin works on any operating system and can be used with [sqflite](https://pub.dev/packages/sqflite) and [sqflite_common_ffi](https://pub.dev/packages/sqflite_common_ffi).
+
+## 📚 [Official Documentation](https://kmsbin.github.io/sqlitec/)
+
 ## Features
 
 Use this plugin in your Dart application to:
@@ -118,3 +121,33 @@ final user = await queries.getCustomerByNameAndStatus('Bob', status: 'registered
 
 print(user); // Customers(id: 1, name: Bob, status: registered,)
 ```
+
+### Return Types
+
+- `:one` → Returns a single row or `null` (`Future<T?>`)
+- `:many` → Returns a list of rows (`Future<List<T>>`)
+- `:exec` → Returns the number of rows affected (`Future<int>`)
+
+#### How result types are inferred
+
+- **Full table selection:**  
+  If your query selects all columns from a table (e.g., `SELECT * FROM customers`), the generated method returns an instance of the corresponding Dart class (e.g., `Customer`).
+
+- **Partial table selection:**  
+  If your query selects only some columns from a table (e.g., `SELECT id, name FROM customers`), the generated method returns a Dart record containing just those fields:
+  ```dart
+  Future<(int id, String name)?> getIdAndName(int $arg1) async { ... }
+  ```
+
+- **Joins or subqueries:**  
+  If your query selects columns from multiple tables or includes computed columns (e.g., joins, subqueries, expressions), the return type is inferred from the selected columns:
+    - **Single column:**  
+      If only one column is selected (e.g., `SELECT COUNT(*) FROM customers`), the method returns that column’s Dart type (e.g., `Future<int?>`).
+    - **Multiple columns:**  
+      If multiple columns are selected (e.g., `SELECT c.id, o.total FROM customers c JOIN orders o ON ...`), the method returns a Dart record with those fields:
+      ```dart
+      Future<(int id, double total)?> getCustomerOrderTotal(int $arg1) async { ... }
+      ```
+
+**Tip:**  
+Dart records provide a concise way to work with queries that return multiple fields but do not map directly to a table class.
